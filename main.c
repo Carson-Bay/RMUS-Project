@@ -33,6 +33,10 @@ int main(int argc, char *argv[]) {
   /* Create the empty pipeline */
   data.pipeline = gst_pipeline_new("test-pipeline");
 
+  // Set Output
+  g_object_set(G_OBJECT(data.sink), "host", "127.0.0.1", NULL);
+  g_object_set(G_OBJECT(data.sink), "port", "8080", NULL);
+
   if (!data.pipeline || !data.source || !data.convert || !data.encode || !data.pay || !data.sink) {
     g_printerr("Not all elements could be created.\n");
     return -1;
@@ -49,9 +53,7 @@ int main(int argc, char *argv[]) {
   /* Set the URI to play */
   g_object_set(data.source, "uri", "https://gstreamer.freedesktop.org/data/media/sintel_trailer-480p.webm", NULL);
 
-  // Set Output
-  g_object_set(G_OBJECT(data.sink), "host", "localhost", NULL);
-  g_object_set(G_OBJECT(data.sink), "port", "3445", NULL);
+  
 
   /* Connect to the pad-added signal */
   g_signal_connect(data.source, "pad-added", G_CALLBACK(pad_added_handler), &data);
