@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
   data.convert = gst_element_factory_make("videoconvert", "convert");
   data.encode = gst_element_factory_make("x264enc", "enc");
   data.pay = gst_element_factory_make("rtph264pay", "pay");
-  data.sink = gst_element_factory_make("autovideosink", "sink");
+  data.sink = gst_element_factory_make("udpsink", "sink");
 
   /* Create the empty pipeline */
   data.pipeline = gst_pipeline_new("test-pipeline");
@@ -47,7 +47,11 @@ int main(int argc, char *argv[]) {
   }
 
   /* Set the URI to play */
-  g_object_set(data.source, "uri", "https://media.githubusercontent.com/media/Haxerus/test-video-repo/master/test_video.webm", NULL);
+  g_object_set(data.source, "uri", "https://gstreamer.freedesktop.org/data/media/sintel_trailer-480p.webm", NULL);
+
+  // Set Output
+  g_object_set(G_OBJECT(data.sink), "host", "localhost", NULL);
+  g_object_set(G_OBJECT(data.sink), "port", "3445", NULL);
 
   /* Connect to the pad-added signal */
   g_signal_connect(data.source, "pad-added", G_CALLBACK(pad_added_handler), &data);
