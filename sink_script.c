@@ -3,6 +3,7 @@
 typedef struct _CustomData {
   GstElement *pipeline;
   GstElement *source;
+  GstElement *filter;
   GstElement *depay;
   GstElement *decode;
   GstElement *sink;
@@ -21,6 +22,7 @@ int main(int argc, char *argv[]) {
 
   /* Create the elements */
   data.source = gst_element_factory_make("udpsrc", "source");
+  data.filter = gst_element_factory_make("capsfilter", "caps");
   data.depay = gst_element_factory_make("rtph264depay", "pay");
   data.decode = gst_element_factory_make("avdec_h264", "enc");
   data.sink = gst_element_factory_make("autovideosink", "sink");
@@ -31,18 +33,21 @@ int main(int argc, char *argv[]) {
   // Set udp source
   g_object_set(G_OBJECT(data.source), "port", 8080, NULL);
 
-  if (!data.pipeline || !data.source || !data.depay || !data.decode || !data.sink) {
+  if (!data.pipeline || !data.source || !data.caps ||!data.depay || !data.decode || !data.sink) {
     g_printerr("Not all elements could be created.\n");
     return -1;
   }
 
   // Build the pipeline
-  gst_bin_add_many(GST_BIN(data.pipeline), data.source, data.depay, data.decode, data.sink, NULL);
-  if (!gst_element_link_many(data.source, data.depay, data.decode, data.sink, NULL)) {
+  gst_bin_add_many(GST_BIN(data.pipeline), data.source, data.caps, data.depay, data.decode, data.sink, NULL);
+  if (!gst_element_link_many(data.source, data.caps, data.depay, data.decode, data.sink, NULL)) {
     g_printerr("Elements could not be linked.\n");
     gst_object_unref(data.pipeline);
     return -1;
   }
+
+  GstCaps *caps = gst_caps_from_string("application/x-rtp, media=(string)video, clock-rate=(int)90000, width=(int)720, height=(int)480, encoding-name=(string)H264, payload=(int)96");
+	g_object_set(data.caps, "caps", caps, NULL);
 
   // Start the pipeline
   ret = gst_element_set_state(data.pipeline, GST_STATE_PLAYING);
