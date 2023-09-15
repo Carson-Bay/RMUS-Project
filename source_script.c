@@ -1,6 +1,5 @@
 #include <gst/gst.h>
 
-/* Structure to contain all our information, so we can pass it to callbacks */
 typedef struct _CustomData {
   GstElement *pipeline;
   GstElement *source;
@@ -10,7 +9,7 @@ typedef struct _CustomData {
   GstElement *sink;
 } CustomData;
 
-/* Handler for the pad-added signal */
+// Pad handler
 static void pad_added_handler (GstElement *src, GstPad *pad, CustomData *data);
 
 int main(int argc, char *argv[]) {
@@ -20,7 +19,7 @@ int main(int argc, char *argv[]) {
   GstStateChangeReturn ret;
   gboolean terminate = FALSE;
 
-  /* Initialize GStreamer */
+  // Init Gstreamer
   gst_init (&argc, &argv);
 
   /* Create the elements */
@@ -35,7 +34,7 @@ int main(int argc, char *argv[]) {
 
   // Set Output
   g_object_set(G_OBJECT(data.sink), "host", "127.0.0.1", NULL);
-  g_object_set(G_OBJECT(data.sink), "port", "8080", NULL);
+  g_object_set(G_OBJECT(data.sink), "port", 8080, NULL);
 
   if (!data.pipeline || !data.source || !data.convert || !data.encode || !data.pay || !data.sink) {
     g_printerr("Not all elements could be created.\n");
@@ -50,15 +49,15 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  /* Set the URI to play */
+  // Set the playing resource
   g_object_set(data.source, "uri", "https://gstreamer.freedesktop.org/data/media/sintel_trailer-480p.webm", NULL);
+  //g_object_set(data.source, "uri", "https://media.githubusercontent.com/media/Haxerus/test-video-repo/master/test_video.webm", NULL);
 
-  
 
   /* Connect to the pad-added signal */
   g_signal_connect(data.source, "pad-added", G_CALLBACK(pad_added_handler), &data);
 
-  /* Start playing */
+  // Start the pipeline
   ret = gst_element_set_state(data.pipeline, GST_STATE_PLAYING);
   if (ret == GST_STATE_CHANGE_FAILURE) {
     g_printerr("Unable to set the pipeline to the playing state.\n");
@@ -66,12 +65,12 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  /* Listen to the bus */
+  // Listen to the bus
   bus = gst_element_get_bus(data.pipeline);
   do {
     msg = gst_bus_timed_pop_filtered(bus, GST_CLOCK_TIME_NONE, GST_MESSAGE_STATE_CHANGED | GST_MESSAGE_ERROR | GST_MESSAGE_EOS);
 
-    /* Parse message */
+    // Parse message 
     if (msg != NULL) {
       GError *err;
       gchar *debug_info;
@@ -90,16 +89,16 @@ int main(int argc, char *argv[]) {
           terminate = TRUE;
           break;
         case GST_MESSAGE_STATE_CHANGED:
-          /* We are only interested in state-changed messages from the pipeline */
-          if (GST_MESSAGE_SRC(msg) == GST_OBJECT (data.pipeline)) {
+          // We are only interested in state-changed messages from the pipeline 
+          if (GST_MESSAGE_SRC(msg) == GST_OBJECT(data.pipeline)) {
             GstState old_state, new_state, pending_state;
-            gst_message_parse_state_changed (msg, &old_state, &new_state, &pending_state);
+            gst_message_parse_state_changed(msg, &old_state, &new_state, &pending_state);
             g_print("Pipeline state changed from %s to %s:\n",
                 gst_element_state_get_name(old_state), gst_element_state_get_name(new_state));
           }
           break;
         default:
-          /* We should not reach here */
+          // Should be unreachable
           g_printerr("Unexpected message received.\n");
           break;
       }
@@ -107,14 +106,13 @@ int main(int argc, char *argv[]) {
     }
   } while(!terminate);
 
-  /* Free resources */
+  // Free resources 
   gst_object_unref(bus);
   gst_element_set_state(data.pipeline, GST_STATE_NULL);
   gst_object_unref(data.pipeline);
   return 0;
 }
 
-/* This function will be called by the pad-added signal */
 static void pad_added_handler (GstElement *src, GstPad *new_pad, CustomData *data) {
   GstPad *sink_pad = gst_element_get_static_pad (data->convert, "sink");
   GstPadLinkReturn ret;
@@ -126,7 +124,7 @@ static void pad_added_handler (GstElement *src, GstPad *new_pad, CustomData *dat
 
   /* If our converter is already linked, we have nothing to do here */
   if (gst_pad_is_linked(sink_pad)) {
-    g_print ("We are already linked. Ignoring.\n");
+    g_print("We are already linked. Ignoring.\n");
     goto exit;
   }
 
@@ -140,7 +138,7 @@ static void pad_added_handler (GstElement *src, GstPad *new_pad, CustomData *dat
   }
 
   /* Attempt the link */
-  ret = gst_pad_link (new_pad, sink_pad);
+  ret = gst_pad_link(new_pad, sink_pad);
   if (GST_PAD_LINK_FAILED (ret)) {
     g_print("Type is '%s' but link failed.\n", new_pad_type);
   } else {
