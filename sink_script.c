@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
   gst_init (&argc, &argv);
 
   /* Create the elements */
-  data.source = gst_element_factory_make("udpsource", "source");
+  data.source = gst_element_factory_make("udpsrc", "source");
   data.depay = gst_element_factory_make("rtph264depay", "pay");
   data.decode = gst_element_factory_make("avdec_h264", "enc");
   data.sink = gst_element_factory_make("autovideosink", "sink");
