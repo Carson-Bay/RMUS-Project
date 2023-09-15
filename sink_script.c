@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
   /* Create the elements */
   data.source = gst_element_factory_make("udpsource", "source");
   data.depay = gst_element_factory_make("rtph264depay", "pay");
-  data.encode = gst_element_factory_make("avdec_h264", "enc");
+  data.decode = gst_element_factory_make("avdec_h264", "enc");
   data.sink = gst_element_factory_make("autovideosink", "sink");
 
   /* Create the empty pipeline */
