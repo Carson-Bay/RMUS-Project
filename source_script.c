@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
   }
 
   // Set the playing resource
-  g_object_set(data.source, "uri", "https://gstreamer.freedesktop.org/data/media/sintel_trailer-480p.webm", NULL);
+  g_object_set(data.source, "uri", "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4", NULL);
   //g_object_set(data.source, "uri", "https://media.githubusercontent.com/media/Haxerus/test-video-repo/master/test_video.webm", NULL);
 
 

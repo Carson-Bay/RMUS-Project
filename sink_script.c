@@ -3,7 +3,7 @@
 typedef struct _CustomData {
   GstElement *pipeline;
   GstElement *source;
-  GstElement *filter;
+  GstElement *caps;
   GstElement *depay;
   GstElement *decode;
   GstElement *sink;
@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
 
   /* Create the elements */
   data.source = gst_element_factory_make("udpsrc", "source");
-  data.filter = gst_element_factory_make("capsfilter", "caps");
+  data.caps = gst_element_factory_make("capsfilter", "caps");
   data.depay = gst_element_factory_make("rtph264depay", "pay");
   data.decode = gst_element_factory_make("avdec_h264", "enc");
   data.sink = gst_element_factory_make("autovideosink", "sink");
